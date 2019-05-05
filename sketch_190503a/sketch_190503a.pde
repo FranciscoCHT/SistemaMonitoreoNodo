@@ -7,6 +7,7 @@ String[] a;
 int end = 10;    // the number 10 is ASCII for linefeed (end of serial.println), later we will look for this to break up individual messages
 String serial;   // declare a new string called 'serial' . A string is a sequence of characters (data type know as "char")
 String val;     // Data received from the serial port
+int cont;
 Serial port;     // The serial port, this is a new instance of the Serial class (an Object)
 Serial myPort;  // Create object from Serial class
 
@@ -26,10 +27,16 @@ void setup()
   //myPort.clear();  // function from serial library that throws out the first reading, in case we started reading in the middle of a string from Arduino
   //val = myPort.readStringUntil(end); // function that reads the string from serial port until a println and then assigns string to our string variable (called 'serial')
   val = null; // initially, the string will be null (empty)
+  cont = 0;
 }
 
 void draw()
 {
+  if (cont == 0) {
+    delay(2000);
+    myPort.write('1');
+    cont = 1;
+  }
   //println(myPort.available());
   if ( myPort.available() > 0) 
   {  // If data is available,
@@ -42,14 +49,15 @@ void draw()
       println(a[1]); //Potencia en watts de la lectura actual
       println(a[2]); //Kwh calculado de la lectura actual
       println(a[3]); //Precio por Kwh calculado de la lectura actual
-      function();
+      sendData();
       //val = null;
-      //delay(10000);
+      delay(10000);
+      myPort.write('1');
     }
-  } 
+  }  
 }
 
-void function()
+void sendData()
 {
   if ( msql.connect() )
     {
