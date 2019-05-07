@@ -1,6 +1,8 @@
 // Include Emon Library
 #include "EmonLib.h"
-//#include <avr/sleep.h> //Contiene los metodos que controlan los modos sleep
+#include <avr/sleep.h> //Contiene los metodos que controlan los modos sleep
+#include <avr/power.h>
+const int ledPin =  LED_BUILTIN;
  
 // Crear una instancia EnergyMonitor
 EnergyMonitor energyMonitor;
@@ -20,7 +22,9 @@ char val;
 void setup()
 {
   Serial.begin(9600);
-  
+  pinMode(ledPin, OUTPUT);
+  digitalWrite(ledPin, HIGH);
+  power_all_enable();
   // Iniciamos la clase indicando
   // Número de pin: donde tenemos conectado el SCT-013
   // Valor de calibración: valor obtenido de la calibración teórica
@@ -32,7 +36,7 @@ void loop()
   if (Serial.available()) 
   { // If data is available to read,
     val = Serial.read(); // read it and store it in val
-
+    
     if (val == '1') {
       // Obtenemos el valor de la corriente eficaz
       // Pasamos el número de muestras que queremos tomar
@@ -57,14 +61,55 @@ void loop()
       Serial.print(kwh, 7);
       Serial.print(",");
       Serial.println(precio, 7);
+      //Serial.print("Serial: Entering Sleep mode");
+      delay(100);     // this delay is needed, the sleep
+                      //function will provoke a Serial error otherwise!!
+      goToSleep();
       //delay(10000);  
     }
   }
 }
-/*
-void Going_To_Sleep {
-  sleep_enable();
-  set_sleep_mode(SLEEP_MODE_PWR_DOWN);
-  delay(1000);
-  sleep_cpu();
-}*/
+
+void goToSleep()
+{
+  /* Now is the time to set the sleep mode. In the Atmega8 datasheet
+  * http://www.atmel.com/dyn/resources/prod_documents/doc2486.pdf on page 35
+  * there is a list of sleep modes which explains which clocks and
+  * wake up sources are available in which sleep modus.
+  *
+  * In the avr/sleep.h file, the call names of these sleep modus are to be found:
+  *
+  * The 5 different modes are:
+  * SLEEP_MODE_IDLE -the least power savings
+  * SLEEP_MODE_ADC
+  * SLEEP_MODE_PWR_SAVE
+  * SLEEP_MODE_STANDBY
+  * SLEEP_MODE_PWR_DOWN -the most power savings
+  *
+  */
+
+  set_sleep_mode(SLEEP_MODE_IDLE); // sleep mode is set here
+
+  sleep_enable(); // enables the sleep bit in the mcucr register
+  // so sleep is possible. just a safety pin
+
+  power_adc_disable();
+  power_spi_disable();
+  power_timer0_disable();
+  power_timer1_disable();
+  power_timer2_disable();
+  power_twi_disable();
+
+  digitalWrite(ledPin, LOW);
+
+  sleep_mode(); // here the device is actually put to sleep!!
+
+  // THE PROGRAM CONTINUES FROM HERE AFTER WAKING UP
+  
+  sleep_disable(); // first thing after waking from sleep:
+  // disable sleep...
+  digitalWrite(ledPin, HIGH);
+
+  power_all_enable();
+
+}
