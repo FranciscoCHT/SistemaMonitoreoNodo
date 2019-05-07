@@ -2,7 +2,10 @@
 #include "EmonLib.h"
 #include <avr/sleep.h> //Contiene los metodos que controlan los modos sleep
 #include <avr/power.h>
+#include <SoftwareSerial.h>
+SoftwareSerial mySerial(3, 2); // RX, TX
 const int ledPin =  LED_BUILTIN;
+const int idNodo = 7;
  
 // Crear una instancia EnergyMonitor
 EnergyMonitor energyMonitor;
@@ -12,7 +15,7 @@ float voltajeRed = 220.0; // Voltaje red
 float nLecturas = 900; // Lecturas cada x segundos
 float sec = 3600; //Segundos para todas las lecturas (1 hora = KwH = 3600 segundos)
 float precioKwh = 74.975;  // Precio por kwh
-char val;
+String val;
 
 //Formula Calculo Kwh
 //    Kwh = voltajeRed * Irms * (1/sec) * nLecturas
@@ -22,6 +25,7 @@ char val;
 void setup()
 {
   Serial.begin(9600);
+  mySerial.begin(9600);
   pinMode(ledPin, OUTPUT);
   digitalWrite(ledPin, HIGH);
   power_all_enable();
@@ -33,11 +37,11 @@ void setup()
  
 void loop()
 {
-  if (Serial.available()) 
+  if (mySerial.available()) 
   { // If data is available to read,
-    val = Serial.read(); // read it and store it in val
-    
-    if (val == '1') {
+    val = mySerial.readStringUntil('\n'); // read it and store it in val
+
+    if (val == "1,0") {
       // Obtenemos el valor de la corriente eficaz
       // Pasamos el número de muestras que queremos tomar
       double Irms = energyMonitor.calcIrms(1484);
@@ -54,18 +58,23 @@ void loop()
       
       // Mostramos la información por el monitor serie
       //Serial.print("Potencia = ");
-      Serial.print(Irms, 7);
-      Serial.print(",");
-      Serial.print(potencia, 7);
-      Serial.print(",");
-      Serial.print(kwh, 7);
-      Serial.print(",");
-      Serial.println(precio, 7);
-      //Serial.print("Serial: Entering Sleep mode");
+      mySerial.print(Irms, 7);
+      mySerial.print(",");
+      mySerial.print(idNodo);
+      mySerial.print(",");
+      mySerial.print(potencia, 7);
+      mySerial.print(",");
+      mySerial.print(kwh, 7);
+      mySerial.print(",");
+      mySerial.println(precio, 7);
+      //mySerial.print("Serial: Entering Sleep mode");
       delay(100);     // this delay is needed, the sleep
                       //function will provoke a Serial error otherwise!!
       goToSleep();
       //delay(10000);  
+    } else {
+      delay(100);
+      goToSleep();
     }
   }
 }
