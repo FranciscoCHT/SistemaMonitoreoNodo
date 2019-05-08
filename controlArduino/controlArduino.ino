@@ -3,17 +3,25 @@
 #include <SoftwareSerial.h>
 SoftwareSerial mySerial(3, 2); // RX, TX
 const int ledPin =  LED_BUILTIN;
-const int idNodo = 6;
+const String idNodo = "6";
+int pinRel1 = 7; // Relay conectado a puerto digital 7
+int pinRel2 = 6; // Relay conectado a puerto digital 6
  
 String val;
+String on;
+String off;
 
 void setup()
 {
   Serial.begin(9600);
   mySerial.begin(9600);
   pinMode(ledPin, OUTPUT);
+  pinMode(pinRel1,OUTPUT); // Señal de control relay 1
+  pinMode(pinRel2, OUTPUT); // Señal de control relay 2 
   digitalWrite(ledPin, HIGH);
   power_all_enable();
+  on = "E" + idNodo;
+  off = "A" + idNodo;
 }
  
 void loop()
@@ -21,19 +29,18 @@ void loop()
   if (mySerial.available()) 
   { // If data is available to read,
     val = mySerial.readStringUntil('\n'); // read it and store it in val
-    
-    if (val == "E," + idNodo) {
-      //mySerial.print("Serial: Entering Sleep mode");
+    mySerial.print(val);
+    if (val == on) {
+      digitalWrite(pinRel1, HIGH);
       delay(100);     // this delay is needed, the sleep
                       //function will provoke a Serial error otherwise!!
       goToSleep();
-    } else if (val == "A," + idNodo) {
-      //mySerial.print("Serial: Entering Sleep mode");
+    } else if (val == off) {
+      digitalWrite(pinRel1, LOW); 
       delay(100);     // this delay is needed, the sleep
                       //function will provoke a Serial error otherwise!!
       goToSleep();
     } else {
-      //mySerial.print("Serial: Entering Sleep mode");
       delay(100);     // this delay is needed, the sleep
                       //function will provoke a Serial error otherwise!!
       goToSleep();
