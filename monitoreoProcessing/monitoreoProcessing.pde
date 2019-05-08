@@ -53,7 +53,7 @@ void draw()
       println(a[4]); //Precio por Kwh calculado de la lectura actual
       sendData();
       //val = null;
-      delay(10000);
+      delay(9000);
       myPort.write("1,0");
       println("writing 1"); //Precio por Kwh calculado de la lectura actual
     }

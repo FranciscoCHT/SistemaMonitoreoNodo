@@ -19,7 +19,7 @@ void setup()
   // is Serial.list()[0].
   // On Windows machines, this generally opens COM1.
   // Open whatever port is the one you're using.
-  String portName = Serial.list()[1]; //change the 0 to a 1 or 2 etc. to match your port
+  String portName = Serial.list()[2]; //change the 0 to a 1 or 2 etc. to match your port
   myPort = new Serial(this, portName, 9600);
   //myPort.clear();  // function from serial library that throws out the first reading, in case we started reading in the middle of a string from Arduino
   //val = myPort.readStringUntil(end); // function that reads the string from serial port until a println and then assigns string to our string variable (called 'serial')
