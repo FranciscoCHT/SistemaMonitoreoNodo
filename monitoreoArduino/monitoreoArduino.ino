@@ -41,7 +41,7 @@ void loop()
   { // If data is available to read,
     val = mySerial.readStringUntil('\n'); // read it and store it in val
 
-    if (val == "1,0") {
+    if (val == "1.0") {
       // Obtenemos el valor de la corriente eficaz
       // Pasamos el número de muestras que queremos tomar
       double Irms = energyMonitor.calcIrms(1484);
@@ -58,6 +58,7 @@ void loop()
       
       // Mostramos la información por el monitor serie
       //Serial.print("Potencia = ");
+      mySerial.print(",");
       mySerial.print(Irms, 7);
       mySerial.print(",");
       mySerial.print(idNodo);

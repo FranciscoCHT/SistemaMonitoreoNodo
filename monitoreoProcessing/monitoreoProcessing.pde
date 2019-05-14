@@ -33,7 +33,7 @@ void draw()
 {
   if (cont == 0) {
     delay(2000);
-    myPort.write("1,0");
+    myPort.write("1.0");
     cont = 1;
   }
 
@@ -46,15 +46,15 @@ void draw()
 
     if (val != null) {
       a = split(val, ',');  //a new array (called 'a') that stores values into separate cells (separated by commas specified in your Arduino program)
-      println(a[0]); //Corriente eficaz (Irms: intensidad) de la lectura actual. Valor usado para calcular la potencia (Potencia = Voltaje * Irms)
-      println(a[1]); //ID del nodo de los datos entrantes
-      println(a[2]); //Potencia en watts de la lectura actual
-      println(a[3]); //Kwh calculado de la lectura actual
-      println(a[4]); //Precio por Kwh calculado de la lectura actual
+      println(a[1]); //Corriente eficaz (Irms: intensidad) de la lectura actual. Valor usado para calcular la potencia (Potencia = Voltaje * Irms)
+      println(a[2]); //ID del nodo de los datos entrantes
+      println(a[3]); //Potencia en watts de la lectura actual
+      println(a[4]); //Kwh calculado de la lectura actual
+      println(a[5]); //Precio por Kwh calculado de la lectura actual
       sendData();
       //val = null;
       delay(9000);
-      myPort.write("1,0");
+      myPort.write("1.0");
       println("writing 1"); //Precio por Kwh calculado de la lectura actual
     }
   }
@@ -64,7 +64,7 @@ void sendData()
 {
   if ( msql.connect() )
     {
-      msql.query( "insert into lectura(Irms, FechaHora, Nodo_ID, Watt, Kwh, Precio)values(" + a[0] + "," + "now()" + "," + a[1] + "," + a[2] + "," + a[3] + "," + a[4] + ")" );
+      msql.query( "insert into lectura(Irms, FechaHora, Nodo_ID, Watt, Kwh, Precio)values(" + a[1] + "," + "now()" + "," + a[2] + "," + a[3] + "," + a[4] + "," + a[5] + ")" );
     } 
   else
     {
