@@ -1,6 +1,7 @@
 import de.bezier.data.sql.*;
 import de.bezier.data.sql.mapper.*;
-import processing.serial.*;
+import processing.serial.*; 
+import processing.net.*;
 
 MySQL msql;      //Create MySQL Object
 String[] a;
@@ -9,6 +10,10 @@ String serial;   // declare a new string called 'serial' . A string is a sequenc
 String val;     // Data received from the serial port
 int cont;
 Serial myPort;  // The serial port, this is a new instance of the Serial class (an Object)
+Server myServer;
+Client c;
+int time;
+int wait = 15000;
 
 void setup()
 {
@@ -17,6 +22,9 @@ void setup()
   String database = "bdsistemamce";
   msql = new MySQL( this, "localhost", database, user, pass );
 
+  size(200, 200);
+  myServer = new Server(this, 5204, "192.168.0.3");
+  
   // I know that the first port in the serial list on my mac
   // is Serial.list()[0].
   // On Windows machines, this generally opens COM1.
@@ -27,6 +35,8 @@ void setup()
   //val = myPort.readStringUntil(end); // function that reads the string from serial port until a println and then assigns string to our string variable (called 'serial')
   //val = null; // initially, the string will be null (empty)
   cont = 0;
+  
+  time = millis();//store the current time
 }
 
 void draw()
@@ -38,11 +48,17 @@ void draw()
   }
 
   //println(myPort.available());
-
+  if(millis() - time >= wait){
+    println("tick");//if it is, do something
+    time = millis();//also update the stored time
+    myPort.write("1.0");
+    println("writing 1"); //Precio por Kwh calculado de la lectura actual
+  }
+  
   if ( myPort.available() > 0) 
   {  // If data is available,
     val = myPort.readStringUntil('\n');         // read it and store it in val
-    println(val);
+    //println(val);
 
     if (val != null) {
       a = split(val, ',');  //a new array (called 'a') that stores values into separate cells (separated by commas specified in your Arduino program)
@@ -53,11 +69,25 @@ void draw()
       println(a[5]); //Precio por Kwh calculado de la lectura actual
       sendData();
       //val = null;
-      delay(9000);
-      myPort.write("1.0");
-      println("writing 1"); //Precio por Kwh calculado de la lectura actual
+      //delay(9000);
     }
   }
+  
+  // Get the next available client
+  Client thisClient = myServer.available();
+  // If the client is not null, and says something, display what it said
+  if (thisClient !=null) {
+    String whatClientSaid = thisClient.readString();
+    if (whatClientSaid != null) {
+      a = split(whatClientSaid, '?');
+      a[0] = "";
+      println(a[1]); //Dato entrante
+      myPort.write(a[1]);
+      //println(thisClient.ip() + " " + whatClientSaid);
+    } 
+    thisClient.write("HTTP/1.1 200 OK\r\nContent-Length: 2\r\n\r\nOK\r\n");
+    //println(thisClient.ip() + " ha sido desconectado");
+  } 
 }
 
 void sendData()

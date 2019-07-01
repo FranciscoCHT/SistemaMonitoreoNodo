@@ -32,7 +32,7 @@ void setup()
   // Iniciamos la clase indicando
   // Número de pin: donde tenemos conectado el SCT-013
   // Valor de calibración: valor obtenido de la calibración teórica
-  energyMonitor.current(0, 2.6);
+  energyMonitor.current(0, 2.65);
 }
  
 void loop()
