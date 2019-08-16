@@ -16,6 +16,7 @@ float nLecturas = 900; // Lecturas cada x segundos
 float sec = 3600; //Segundos para todas las lecturas (1 hora = KwH = 3600 segundos)
 float precioKwh = 74.975;  // Precio por kwh
 String val;
+float fcalibracion = 0;
 
 //Formula Calculo Kwh
 //    Kwh = voltajeRed * Irms * (1/sec) * nLecturas
@@ -32,12 +33,12 @@ void setup()
   // Iniciamos la clase indicando
   // Número de pin: donde tenemos conectado el SCT-013
   // Valor de calibración: valor obtenido de la calibración teórica
-  energyMonitor.current(0, 2.65);
+  // energyMonitor.current(0, 2.65);
 }
  
 void loop()
 {
-  if (mySerial.available()) 
+  if (mySerial.available() && fcalibracion != 0) 
   { // If data is available to read,
     val = mySerial.readStringUntil('\n'); // read it and store it in val
 
@@ -68,6 +69,8 @@ void loop()
       mySerial.print(kwh, 7);
       mySerial.print(",");
       mySerial.println(precio, 7);
+      mySerial.end();
+      mySerial.begin(9600);
       //mySerial.print("Serial: Entering Sleep mode");
       delay(100);     // this delay is needed, the sleep
                       //function will provoke a Serial error otherwise!!
@@ -77,6 +80,11 @@ void loop()
       delay(100);
       goToSleep();
     }
+  }
+  else if (mySerial.available() && fcalibracion == 0)
+  {
+    fcalibracion = 2.65;
+    energyMonitor.current(0, fcalibracion);
   }
 }
 

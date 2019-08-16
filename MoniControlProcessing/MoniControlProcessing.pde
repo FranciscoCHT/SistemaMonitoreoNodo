@@ -23,7 +23,7 @@ void setup()
   msql = new MySQL( this, "localhost", database, user, pass );
 
   size(200, 200);
-  myServer = new Server(this, 5204, "192.168.0.3");
+  myServer = new Server(this, 5204, "192.168.0.2");
   
   // I know that the first port in the serial list on my mac
   // is Serial.list()[0].
@@ -68,6 +68,7 @@ void draw()
       println(a[4]); //Kwh calculado de la lectura actual
       println(a[5]); //Precio por Kwh calculado de la lectura actual
       sendData();
+      myPort.clear();
       //val = null;
       //delay(9000);
     }
