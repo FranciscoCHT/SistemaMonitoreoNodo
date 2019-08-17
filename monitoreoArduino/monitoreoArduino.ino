@@ -48,27 +48,27 @@ void loop()
       double Irms = energyMonitor.calcIrms(1484);
      
       // Calculamos la potencia aparente (watt)
-      double potencia =  Irms * voltajeRed;
+      //double potencia =  Irms * voltajeRed;
     
       // Calculamos el Kilowatt Hora
       // Se utiliza la formula de Kwh, sustituyendo Potencia = voltajeRed * Irms
-      double kwh = (potencia * (1/sec) * nLecturas) / 1000;
+      //double kwh = (potencia * (1/sec) * nLecturas) / 1000;
     
       // Calcuamos el precio por Kwh de la lectura actual
-      double precio = kwh * precioKwh;
+      //double precio = kwh * precioKwh;
       
       // Mostramos la información por el monitor serie
       //Serial.print("Potencia = ");
       mySerial.print(",");
-      mySerial.print(Irms, 7);
+      mySerial.print(Irms, 3);
       mySerial.print(",");
-      mySerial.print(idNodo);
-      mySerial.print(",");
-      mySerial.print(potencia, 7);
-      mySerial.print(",");
-      mySerial.print(kwh, 7);
-      mySerial.print(",");
-      mySerial.println(precio, 7);
+      mySerial.println(idNodo);
+      //mySerial.print(",");
+      //mySerial.print(potencia, 7);
+      //mySerial.print(",");
+      //mySerial.print(kwh, 7);
+      //mySerial.print(",");
+      //mySerial.println(precio, 7);
       mySerial.end();
       mySerial.begin(9600);
       //mySerial.print("Serial: Entering Sleep mode");
