@@ -15,7 +15,7 @@ Client c;
 int time;
 int wait = 15000;
 float voltajeRed = 220.0; // Voltaje red
-float nLecturas = 900; // Lecturas cada x segundos
+int nLecturas = 900; // 900 seg = 15 minutos // Lecturas cada x segundos
 float sec = 3600; //Segundos para todas las lecturas (1 hora = KwH = 3600 segundos)
 float precioKwh = 74.975;  // Precio por kwh
 float potencia = 0;
@@ -30,13 +30,13 @@ void setup()
   msql = new MySQL( this, "localhost", database, user, pass );
 
   size(200, 200);
-  myServer = new Server(this, 5204, "192.168.0.15");
+  myServer = new Server(this, 5204, "192.168.0.2");
   
   // I know that the first port in the serial list on my mac
   // is Serial.list()[0].
   // On Windows machines, this generally opens COM1.
   // Open whatever port is the one you're using.
-  String portName = Serial.list()[0]; //change the 0 to a 1 or 2 etc. to match your port
+  String portName = Serial.list()[1]; //change the 0 to a 1 or 2 etc. to match your port
   myPort = new Serial(this, portName, 9600);
   //myPort.clear();  // function from serial library that throws out the first reading, in case we started reading in the middle of a string from Arduino
   //val = myPort.readStringUntil(end); // function that reads the string from serial port until a println and then assigns string to our string variable (called 'serial')
@@ -49,6 +49,15 @@ void setup()
 void draw()
 {
   if (cont == 0) {
+    String[] lines = loadStrings("configuracion.txt");
+    String[] linea1 = split(lines[1], ':');
+    String[] linea2 = split(lines[3], ':');
+    nLecturas = int(linea1[1]);
+    precioKwh = float(linea2[1]);
+    wait = int(linea1[1])*1000;
+    println(nLecturas);
+    println(precioKwh);
+    println(wait);
     delay(2000);
     myPort.write("1.0");
     cont = 1;
@@ -56,10 +65,18 @@ void draw()
 
   //println(myPort.available());
   if(millis() - time >= wait){
-    println("tick");//if it is, do something
+    String[] lines = loadStrings("configuracion.txt");
+    String[] linea1 = split(lines[1], ':');
+    String[] linea2 = split(lines[3], ':');
+    nLecturas = int(linea1[1]);
+    precioKwh = float(linea2[1]);
+    wait = int(linea1[1])*1000;
+    println("\n"+nLecturas);
+    println(precioKwh);
+    println(wait);
     time = millis();//also update the stored time
     myPort.write("1.0");
-    println("writing 1"); //Precio por Kwh calculado de la lectura actual
+    println("writing 1"); 
   }
   
   if ( myPort.available() > 0) 
@@ -70,7 +87,16 @@ void draw()
     if (val != null) {
       a = split(val, ',');  //a new array (called 'a') that stores values into separate cells (separated by commas specified in your Arduino program)
       println(a[1].substring(0, a[1].length()-1)); //Corriente eficaz (Irms: intensidad) de la lectura actual. Valor usado para calcular la potencia (Potencia = Voltaje * Irms)
-      println(a[2]); //ID del nodo de los datos entrantes
+      print(a[2]); //ID del nodo de los datos entrantes
+      
+      if ( msql.connect() ){
+        msql.query("SELECT voltaje FROM nodo WHERE id = " + a[2]);
+        msql.next();
+        voltajeRed = msql.getFloat("voltaje");
+      } else {
+        // connection failed !
+      } msql.close();
+
       potencia = float(a[1].substring(0, a[1].length()-1)) * voltajeRed;//println(a[3]); //Potencia en watts de la lectura actual
       println(potencia);
       kwh = (potencia * (1/sec) * nLecturas) / 1000; //println(a[4]); //Kwh calculado de la lectura actual

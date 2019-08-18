@@ -11,10 +11,10 @@ const int idNodo = 7;
 EnergyMonitor energyMonitor;
  
 // Voltaje de nuestra red eléctrica
-float voltajeRed = 220.0; // Voltaje red
-float nLecturas = 900; // Lecturas cada x segundos
-float sec = 3600; //Segundos para todas las lecturas (1 hora = KwH = 3600 segundos)
-float precioKwh = 74.975;  // Precio por kwh
+//float voltajeRed = 220.0; // Voltaje red
+//float nLecturas = 900; // Lecturas cada x segundos
+//float sec = 3600; //Segundos para todas las lecturas (1 hora = KwH = 3600 segundos)
+//float precioKwh = 74.975;  // Precio por kwh
 String val;
 float fcalibracion = 0;
 
