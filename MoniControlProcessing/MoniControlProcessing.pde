@@ -50,32 +50,60 @@ void draw()
 {
   if (cont == 0) {
     String[] lines = loadStrings("configuracion.txt");
-    String[] linea1 = split(lines[1], ':');
-    String[] linea2 = split(lines[3], ':');
-    nLecturas = int(linea1[1]);
-    precioKwh = float(linea2[1]);
-    wait = int(linea1[1])*1000;
+    String[] valor1 = split(lines[1], ':');
+    String[] valor2 = split(lines[3], ':');
+    nLecturas = int(trim(valor1[1]));
+    precioKwh = float(trim(valor2[1]));
+    wait = int(trim(valor1[1]))*1000;
     println(nLecturas);
     println(precioKwh);
     println(wait);
+    
+    String tablaCalib = "";
+    if ( msql.connect() ){
+      msql.query("SELECT id, fcalibracion FROM nodo WHERE tipo = 0");
+      while (msql.next()){
+        int idfcalib = msql.getInt("id");
+        float fcalib = msql.getFloat("fcalibracion");
+        tablaCalib = tablaCalib + idfcalib + ":" + fcalib + ";";
+        // println(tablaCalib);
+      }
+    } else {
+      // connection failed !
+    } msql.close();
+    
     delay(2000);
-    myPort.write("1.0");
+    myPort.write("1.0;" + tablaCalib);
     cont = 1;
   }
 
   //println(myPort.available());
   if(millis() - time >= wait){
     String[] lines = loadStrings("configuracion.txt");
-    String[] linea1 = split(lines[1], ':');
-    String[] linea2 = split(lines[3], ':');
-    nLecturas = int(linea1[1]);
-    precioKwh = float(linea2[1]);
-    wait = int(linea1[1])*1000;
+    String[] valor1 = split(lines[1], ':');
+    String[] valor2 = split(lines[3], ':');
+    nLecturas = int(trim(valor1[1]));
+    precioKwh = float(trim(valor2[1]));
+    wait = int(trim(valor1[1]))*1000;
     println("\n"+nLecturas);
     println(precioKwh);
     println(wait);
+    
+    String tablaCalib = "";
+    if ( msql.connect() ){
+      msql.query("SELECT id, fcalibracion FROM nodo WHERE tipo = 0");
+      while (msql.next()){
+        int idfcalib = msql.getInt("id");
+        float fcalib = msql.getFloat("fcalibracion");
+        tablaCalib = tablaCalib + idfcalib + ":" + fcalib + ";";
+        // println(tablaCalib);
+      }
+    } else {
+      // connection failed !
+    } msql.close();
+    
     time = millis();//also update the stored time
-    myPort.write("1.0");
+    myPort.write("1.0;" + tablaCalib);
     println("writing 1"); 
   }
   

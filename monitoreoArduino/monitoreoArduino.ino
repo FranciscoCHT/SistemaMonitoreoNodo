@@ -2,10 +2,12 @@
 #include "EmonLib.h"
 #include <avr/sleep.h> //Contiene los metodos que controlan los modos sleep
 #include <avr/power.h>
+#include <Separador.h>
 #include <SoftwareSerial.h>
 SoftwareSerial mySerial(3, 2); // RX, TX
 const int ledPin =  LED_BUILTIN;
 const int idNodo = 7;
+Separador s;
  
 // Crear una instancia EnergyMonitor
 EnergyMonitor energyMonitor;
@@ -17,6 +19,7 @@ EnergyMonitor energyMonitor;
 //float precioKwh = 74.975;  // Precio por kwh
 String val;
 float fcalibracion = 0;
+int cont = 0;
 
 //Formula Calculo Kwh
 //    Kwh = voltajeRed * Irms * (1/sec) * nLecturas
@@ -38,15 +41,19 @@ void setup()
  
 void loop()
 {
-  if (mySerial.available() && fcalibracion != 0) 
+  if ((mySerial.available() && fcalibracion != 0) || cont > 0) 
   { // If data is available to read,
-    val = mySerial.readStringUntil('\n'); // read it and store it in val
-
-    if (val == "1.0") {
+    if (cont != 1){
+      val = mySerial.readStringUntil('\n'); // read it and store it in val
+    }
+    cont = 2;
+    // Serial.println(val);
+    if (val.startsWith("1.0")) {
+      // Serial.println(val);
       // Obtenemos el valor de la corriente eficaz
       // Pasamos el número de muestras que queremos tomar
       double Irms = energyMonitor.calcIrms(1484);
-     
+
       // Calculamos la potencia aparente (watt)
       //double potencia =  Irms * voltajeRed;
     
@@ -83,8 +90,26 @@ void loop()
   }
   else if (mySerial.available() && fcalibracion == 0)
   {
-    fcalibracion = 2.65;
-    energyMonitor.current(0, fcalibracion);
+    val = mySerial.readStringUntil('\n');
+    if (val.startsWith("1.0")) {
+      int id = 0;
+      int i = 1;
+      String idString;
+      String fcalString;
+      while (id != idNodo){
+        String ids = s.separa(val, ';', i);
+        // Serial.println(ids);
+        idString = s.separa(ids, ':', 0);
+        fcalString = s.separa(ids, ':', 1);
+        id = idString.toInt();
+        // Serial.println(id);
+        i++;
+      }
+      fcalibracion = fcalString.toFloat();
+      Serial.println(fcalibracion);
+      energyMonitor.current(0, fcalibracion);
+      cont = 1;
+    }
   }
 }
 
