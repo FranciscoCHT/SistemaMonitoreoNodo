@@ -30,7 +30,7 @@ void setup()
   msql = new MySQL( this, "localhost", database, user, pass );
 
   size(200, 200);
-  myServer = new Server(this, 5204, "192.168.0.2");
+  myServer = new Server(this, 5204, "192.168.0.5");
   
   // I know that the first port in the serial list on my mac
   // is Serial.list()[0].
