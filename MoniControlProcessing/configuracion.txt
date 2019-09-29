@@ -1,5 +1,5 @@
 // Valor de cada cuanto tiempo deben ser tomadas las lecturas en segundos (recomendado entre 300s y 1200s).
-nLectura: 7
+nLectura: 10
 // Valor de precio por KWh de la empresa eléctrica ($$)
 precioKwh: 74.975
 // MODIFICAR SOLO LOS VALORES NUMÉRICOS

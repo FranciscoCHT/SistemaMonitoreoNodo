@@ -5,6 +5,10 @@ import processing.net.*;
 
 MySQL msql;      //Create MySQL Object
 String[] a;
+String inten;
+String potencia2;
+String precio2;
+String kwh2;
 int end = 10;    // the number 10 is ASCII for linefeed (end of serial.println), later we will look for this to break up individual messages
 String serial;   // declare a new string called 'serial' . A string is a sequence of characters (data type know as "char")
 String val;     // Data received from the serial port
@@ -55,9 +59,9 @@ void draw()
     nLecturas = int(trim(valor1[1]));
     precioKwh = float(trim(valor2[1]));
     wait = int(trim(valor1[1]))*1000;
-    println(nLecturas);
-    println(precioKwh);
-    println(wait);
+    //println("Tiempo entre muestras (s): " + nLecturas);
+    //println("Precio de KWh: " + precioKwh);
+    //println(wait);
     
     String tablaCalib = "";
     if ( msql.connect() ){
@@ -74,6 +78,7 @@ void draw()
     
     delay(2000);
     myPort.write("1.0;" + tablaCalib);
+    println("Solicitando datos...\n"); 
     cont = 1;
   }
 
@@ -85,9 +90,10 @@ void draw()
     nLecturas = int(trim(valor1[1]));
     precioKwh = float(trim(valor2[1]));
     wait = int(trim(valor1[1]))*1000;
-    println("\n"+nLecturas);
-    println(precioKwh);
-    println(wait);
+    //println("\nTiempo entre muestras (s): "+nLecturas);
+    //println("Precio de KWh: " + precioKwh);
+    //println(wait);
+    println("--------------------------------------\n");
     
     String tablaCalib = "";
     if ( msql.connect() ){
@@ -104,7 +110,7 @@ void draw()
     
     time = millis();//also update the stored time
     myPort.write("1.0;" + tablaCalib);
-    println("writing 1"); 
+    println("Solicitando datos...\n"); 
   }
   
   if ( myPort.available() > 0) 
@@ -114,8 +120,13 @@ void draw()
 
     if (val != null) {
       a = split(val, ',');  //a new array (called 'a') that stores values into separate cells (separated by commas specified in your Arduino program)
-      println(a[1].substring(0, a[1].length()-1)); //Corriente eficaz (Irms: intensidad) de la lectura actual. Valor usado para calcular la potencia (Potencia = Voltaje * Irms)
-      print(a[2]); //ID del nodo de los datos entrantes
+      print("ID nodo: " + a[2]); //ID del nodo de los datos entrantes
+      float in = float(a[1].substring(0, a[1].length()-1))-0.01;
+      if (in < 0) {
+        in = 0.00;
+      }
+      inten = nf(in, 0, 2);
+      println("Corriente (IRMS): " + float(inten)); //Corriente eficaz (Irms: intensidad) de la lectura actual. Valor usado para calcular la potencia (Potencia = Voltaje * Irms)
       
       if ( msql.connect() ){
         msql.query("SELECT voltaje FROM nodo WHERE id = " + a[2]);
@@ -125,12 +136,14 @@ void draw()
         // connection failed !
       } msql.close();
 
-      potencia = float(a[1].substring(0, a[1].length()-1)) * voltajeRed;//println(a[3]); //Potencia en watts de la lectura actual
-      println(potencia);
-      kwh = (potencia * (1/sec) * nLecturas) / 1000; //println(a[4]); //Kwh calculado de la lectura actual
-      println(kwh);
-      precio = kwh * precioKwh; //println(a[5]); //Precio por Kwh calculado de la lectura actual
-      println(precio);
+      potencia = float(inten) * voltajeRed;//println(a[3]); //Potencia en watts de la lectura actual
+      potencia2 = nf(potencia, 0, 5);
+      println("\nPotencia (Watt): " + float(potencia2));
+      kwh = (float(potencia2) * (1/sec) * 900) / 1000; //println(a[4]); //Kwh calculado de la lectura actual
+      kwh2 = nf(kwh, 0, 5);
+      println("Kilowatt hora (KWh): " + float(kwh2));
+      precio = float(kwh2) * precioKwh; //println(a[5]); //Precio por Kwh calculado de la lectura actual
+      println("Precio ($): " + precio);
       sendData();
       myPort.clear();
       //val = null;
@@ -159,7 +172,7 @@ void sendData()
 {
   if ( msql.connect() )
     {
-      //msql.query( "insert into lectura(Irms, FechaHora, Nodo_ID, Watt, Kwh, Precio)values(" + a[1] + "," + "now()" + "," + a[2] + "," + potencia + "," + kwh + "," + precio + ")" );
+      //msql.query( "insert into lectura(Irms, FechaHora, Nodo_ID, Watt, Kwh, Precio)values(" + inten + "," + "now()" + "," + a[2] + "," + potencia2 + "," + kwh2 + "," + precio + ")" );
     } 
   else
     {
