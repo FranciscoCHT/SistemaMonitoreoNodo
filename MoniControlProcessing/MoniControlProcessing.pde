@@ -137,7 +137,7 @@ void draw()
       } msql.close();
 
       potencia = float(inten) * voltajeRed;//println(a[3]); //Potencia en watts de la lectura actual
-      potencia2 = nf(potencia, 0, 5);
+      potencia2 = nf(potencia, 0, 3);
       println("\nPotencia (Watt): " + float(potencia2));
       kwh = (float(potencia2) * (1/sec) * 900) / 1000; //println(a[4]); //Kwh calculado de la lectura actual
       kwh2 = nf(kwh, 0, 5);
